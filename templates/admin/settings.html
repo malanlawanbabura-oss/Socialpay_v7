@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a0533">
+  <title>Settings - Admin</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="admin-header">
+  <div class="admin-logo">{{ get_app_name() }} <span style="font-size:11px;opacity:0.7">Admin</span></div>
+  <a href="/admin" style="color:white;font-size:13px;font-weight:700;text-decoration:none">← Dashboard</a>
+</div>
+<nav class="admin-nav">
+  <a href="/admin" class="admin-nav-item">📊 Dashboard</a>
+  <a href="/admin/users" class="admin-nav-item">👥 Users</a>
+  <a href="/admin/tasks" class="admin-nav-item">📋 Tasks</a>
+  <a href="/admin/submissions" class="admin-nav-item">📝 Submissions</a>
+  <a href="/admin/withdrawals" class="admin-nav-item">💸 Withdrawals</a>
+  <a href="/admin/broadcast" class="admin-nav-item">📢 Broadcast</a>
+  <a href="/admin/support" class="admin-nav-item">🎫 Support</a>
+  <a href="/admin/settings" class="admin-nav-item active">⚙️ Settings</a>
+  <a href="/admin/logs" class="admin-nav-item">📋 Logs</a>
+</nav>
+<div class="admin-content">
+  <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ System Settings</div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:15px;font-weight:800;margin-bottom:16px">💰 Financial Settings</div>
+    <div class="form-group"><label class="form-label">Referral L1 Bonus (₦)</label><input type="number" class="form-control" name="referral_bonus" id="referral_bonus" value="{{ settings.referral_bonus }}"></div>
+    <div class="form-group"><label class="form-label">Referral L2 Bonus (₦)</label><input type="number" class="form-control" name="referral_bonus_l2" id="referral_bonus_l2" value="{{ settings.get('referral_bonus_l2',15) }}"></div>
+    <div class="form-group"><label class="form-label">Tasks Needed for Referral Bonus</label><input type="number" class="form-control" name="referral_tasks_needed" id="referral_tasks_needed" value="{{ settings.referral_tasks_needed }}"></div>
+    <div class="form-group"><label class="form-label">Withdrawal Fee (%)</label><input type="number" class="form-control" name="withdrawal_fee_percent" id="withdrawal_fee_percent" value="{{ settings.withdrawal_fee_percent }}" step="0.1"></div>
+    <div class="form-group"><label class="form-label">Min Withdrawal (₦)</label><input type="number" class="form-control" name="min_withdrawal" id="min_withdrawal" value="{{ settings.min_withdrawal }}"></div>
+    <div class="form-group"><label class="form-label">Max Withdrawal (₦)</label><input type="number" class="form-control" name="max_withdrawal" id="max_withdrawal" value="{{ settings.max_withdrawal }}"></div>
+    <div class="form-group"><label class="form-label">Exchange Rate ($1 = ₦)</label><input type="number" class="form-control" name="exchange_rate" id="exchange_rate" value="{{ settings.exchange_rate }}"></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:15px;font-weight:800;margin-bottom:16px">🎁 Reward Settings</div>
+    <div class="toggle-wrap">
+      <span class="toggle-label">Sign-up Reward Enabled</span>
+      <div class="toggle {{ 'on' if settings.signup_reward_enabled else '' }}" id="signup_toggle" onclick="toggleSwitch('signup_toggle','signup_reward_enabled')"></div>
+      <input type="hidden" id="signup_reward_enabled" value="{{ '1' if settings.signup_reward_enabled else '0' }}">
+    </div>
+    <div class="form-group" style="margin-top:12px"><label class="form-label">Sign-up Reward Amount (₦)</label><input type="number" class="form-control" id="signup_reward_amount" value="{{ settings.get('signup_reward_amount',50) }}"></div>
+    <div class="toggle-wrap">
+      <span class="toggle-label">Daily Login Reward Enabled</span>
+      <div class="toggle {{ 'on' if settings.daily_login_enabled else '' }}" id="daily_toggle" onclick="toggleSwitch('daily_toggle','daily_login_enabled')"></div>
+      <input type="hidden" id="daily_login_enabled" value="{{ '1' if settings.daily_login_enabled else '0' }}">
+    </div>
+    <div class="form-group" style="margin-top:12px"><label class="form-label">Daily Login Reward (₦)</label><input type="number" class="form-control" id="daily_login_reward" value="{{ settings.get('daily_login_reward',10) }}"></div>
+    <div class="toggle-wrap">
+      <span class="toggle-label">Spin & Win Enabled</span>
+      <div class="toggle {{ 'on' if settings.spin_enabled else '' }}" id="spin_toggle" onclick="toggleSwitch('spin_toggle','spin_enabled')"></div>
+      <input type="hidden" id="spin_enabled" value="{{ '1' if settings.spin_enabled else '0' }}">
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Spin Cost per Spin (₦)</label>
+      <input type="number" class="form-control" id="spin_cost" value="{{ settings.get('spin_cost', 50)|int }}" min="1" placeholder="e.g. 50">
+      <div style="font-size:11px;color:#888;margin-top:4px">Amount deducted from user wallet before each spin</div>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Daily Spin Limit per User (0 = unlimited)</label>
+      <input type="number" class="form-control" id="spin_daily_limit" value="{{ settings.get('spin_daily_limit', 0)|int }}" min="0" placeholder="0 = unlimited">
+      <div style="font-size:11px;color:#888;margin-top:4px">Max spins per user per day. 0 means unlimited.</div>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Spin Prize Amounts (₦) — comma separated</label>
+      <input type="text" class="form-control" id="spin_prizes" value="{{ settings.get('spin_prizes', [10,50,100,200,500,1000])|join(',') }}" placeholder="e.g. 10,50,100,200,500,1000">
+      <div style="font-size:11px;color:#888;margin-top:4px">Up to 8 prize amounts. Smaller prizes = higher chance of winning. Example: 10,50,100,200,500,1000</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:15px;font-weight:800;margin-bottom:16px">🌐 Site Settings</div>
+    <div class="form-group"><label class="form-label">Site Name</label><input type="text" class="form-control" id="site_name" value="{{ settings.site_name }}"></div>
+    <div class="toggle-wrap">
+      <span class="toggle-label">Maintenance Mode</span>
+      <div class="toggle {{ 'on' if settings.maintenance else '' }}" id="maint_toggle" onclick="toggleSwitch('maint_toggle','maintenance')"></div>
+      <input type="hidden" id="maintenance" value="{{ '1' if settings.maintenance else '0' }}">
+    </div>
+    <div class="form-group" style="margin-top:12px"><label class="form-label">Announcement Banner</label><textarea class="form-control" id="announcement" rows="3" placeholder="Leave empty to hide">{{ settings.announcement }}</textarea></div>
+  </div>
+  <button class="btn btn-primary" id="save-btn" onclick="saveSettings()">💾 {{ t('settings_saved') }}</button>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="/static/js/app.js"></script>
+<script>
+function toggleSwitch(toggleId, fieldId) {
+  const tog=document.getElementById(toggleId);
+  const inp=document.getElementById(fieldId);
+  tog.classList.toggle('on');
+  inp.value=tog.classList.contains('on')?'1':'0';
+}
+async function saveSettings() {
+  const fd=new FormData();
+  ['referral_bonus','referral_bonus_l2','referral_tasks_needed','withdrawal_fee_percent','min_withdrawal','max_withdrawal','exchange_rate','signup_reward_amount','daily_login_reward'].forEach(k=>{
+    const el=document.getElementById(k); if(el) fd.append(k,el.value);
+  });
+  fd.append('site_name',document.getElementById('site_name').value);
+  fd.append('maintenance',document.getElementById('maintenance').value);
+  fd.append('announcement',document.getElementById('announcement').value);
+  fd.append('signup_reward_enabled',document.getElementById('signup_reward_enabled').value);
+  fd.append('daily_login_enabled',document.getElementById('daily_login_enabled').value);
+  fd.append('spin_enabled',document.getElementById('spin_enabled').value);
+  const sc=document.getElementById('spin_cost'); if(sc) fd.append('spin_cost',sc.value);
+  const sdl=document.getElementById('spin_daily_limit'); if(sdl) fd.append('spin_daily_limit',sdl.value);
+  const sp=document.getElementById('spin_prizes'); if(sp) fd.append('spin_prizes',sp.value);
+  await postForm('/admin/settings',fd,document.getElementById('save-btn'));
+}
+</script>
+</body>
+</html>

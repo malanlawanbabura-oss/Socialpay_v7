@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0A2463">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>{{ t("broadcast") }} - { get_app_name() }</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="page-header" style="background:linear-gradient(135deg,#1a0533,#3d0d6b)">
+  <a href="/admin" class="back-btn" style="background:rgba(255,255,255,0.15)">←</a>
+  <div class="page-title-wrap"><div class="page-title">📢 {{ t('broadcast') }}</div></div>
+</div>
+<div style="padding:16px;background:#F0F4FF;min-height:calc(100vh - 60px)">
+  <div class="card">
+    <div class="form-group"><label class="form-label">Message</label><textarea class="form-control" id="bc-msg" rows="4" placeholder="Write your announcement..."></textarea></div>
+    <div class="form-group"><label class="form-label">Type</label>
+      <select class="form-control" id="bc-type">
+        <option value="info">ℹ️ Info</option><option value="success">✅ Good News</option>
+        <option value="warning">⚠️ Warning</option><option value="error">❌ Alert</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="bc-btn" onclick="doBroadcast()">📢 {{ t('broadcast') }}</button>
+  </div>
+</div>
+
+  <div id="toast-container" class="toast-container"></div>
+  <script src="/static/js/app.js"></script>
+<script>
+async function doBroadcast() {
+  const fd = new FormData();
+  fd.append('message', document.getElementById('bc-msg').value);
+  fd.append('type', document.getElementById('bc-type').value);
+  fd.append('target', 'all');
+  const r = await postForm('/admin/broadcast', fd, document.getElementById('bc-btn'));
+  if (r?.success) document.getElementById('bc-msg').value = '';
+}
+</script>
+</body>
+</html>
